@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FigureDrawingApp
+namespace FigureDrawingApp.Figures
 {
     internal class Rectangle : Figure
     {
@@ -16,11 +16,11 @@ namespace FigureDrawingApp
         {
             X = startX;
             Y = startY;
-            this.Width = width;
-            this.Height = height;
+            Width = width;
+            Height = height;
             FillColor = fillColor;
             OutlineColor = outlineColor;
-            _points = new PointF[] 
+            _points = new PointF[]
                 {
                 new PointF(X, Y),
                 new PointF(X + width, Y),
@@ -33,7 +33,7 @@ namespace FigureDrawingApp
         public override void CalculateArea()
         {
             //convert to cm^2
-            Area =  (Width * Height);
+            Area = Width * Height;
         }
 
         public override void Draw(Graphics g)

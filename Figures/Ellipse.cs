@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FigureDrawingApp
+namespace FigureDrawingApp.Figures
 {
     internal class Ellipse : Figure
     {
@@ -24,7 +24,7 @@ namespace FigureDrawingApp
         public override void CalculateArea()
         {
             //PI * r^2 = Area
-            Area = (Math.PI * (Width / 2.0) * (Height / 2.0));
+            Area = Math.PI * (Width / 2.0) * (Height / 2.0);
         }
 
         public override bool Contains(PointF point)
@@ -33,7 +33,7 @@ namespace FigureDrawingApp
             float b = Height / 2.0f;
             float dx = point.X - (X + a);
             float dy = point.Y - (Y + b);
-            return (dx * dx) / (a * a) + (dy * dy) / (b * b) <= 1;
+            return dx * dx / (a * a) + dy * dy / (b * b) <= 1;
         }
 
         public override void Draw(Graphics g)

@@ -1,11 +1,11 @@
+using FigureDrawingApp.Command_Handling;
+using FigureDrawingApp.Figures;
 namespace FigureDrawingApp
 {
     public partial class FormMain : Form
     {
         private static readonly List<Figure> _figures = new List<Figure>();
-        private Stack<List<Figure>> undoStack = new Stack<List<Figure>>();
-        private Stack<List<Figure>> redoStack = new Stack<List<Figure>>();
-
+        private CommandController _commandController = new CommandController();
         private Point startPoint;
         private bool isDrawingAllowed = false;
         private Color fillColor = Color.Transparent;
@@ -20,15 +20,15 @@ namespace FigureDrawingApp
         private double dpiX;
         private double dpiY;
         private bool isErasable = false;
+        private int _x;
+        private int _y;
+
 
         public FormMain()
         {
-
             InitializeComponent();
             comboBox1.DataSource = (Enum.GetValues(typeof(FigureType)));
             comboBox1.SelectedIndex = 0;
-
-            undoStack.Push(CreateAppStateSnapshot());
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -41,8 +41,6 @@ namespace FigureDrawingApp
         {
             base.OnMouseDown(e);
             getArea = false;
-
-            var prevState = CreateAppStateSnapshot();
 
             if (!fillReady && e.Button == MouseButtons.Left)
             {
@@ -59,15 +57,12 @@ namespace FigureDrawingApp
                     if (figure.Contains(e.Location))
                     {
                         selectedFigure = figure;
-
-                        selectedFigure.SetPosition(e.Location.X, e.Location.Y);
-                        mouseOffset = new Point(e.Location.X - selectedFigure.X, e.Location.Y - selectedFigure.Y);
-
+                        _x = figure.X;
+                        _y = figure.Y;
                         break;
                     }
                 }
             }
-            undoStack.Push(prevState);
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -78,24 +73,14 @@ namespace FigureDrawingApp
             {
                 int newX = e.Location.X - mouseOffset.X;
                 int newY = e.Location.Y - mouseOffset.Y;
-
-                if (fillReady)
-                {
-                    selectedFigure.FillColor = fillColor;
-                }
-
                 selectedFigure.SetPosition(newX, newY);
-
                 Invalidate();
-
             }
         }
 
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
-
-            var prevState = CreateAppStateSnapshot();
 
             if (!fillReady && isDrawingAllowed && e.Button == MouseButtons.Left && startPoint != Point.Empty)
             {
@@ -107,8 +92,7 @@ namespace FigureDrawingApp
                 switch (currentFigureType)
                 {
                     case FigureType.Rectangle:
-                        currentFigure = new Rectangle(x, y, width, height, fillColor, Color.Black);
-
+                        currentFigure = new Figures.Rectangle(x, y, width, height, fillColor, Color.Black);
                         break;
                     case FigureType.Ellipse:
                         currentFigure = new Ellipse(x, y, width, height, fillColor, Color.Black);
@@ -118,16 +102,10 @@ namespace FigureDrawingApp
                         break;
                 }
 
-                _figures.Add(currentFigure);
-
-                if (isReadyToMove && selectedFigure != null && e.Button == MouseButtons.Left)
-                {
-                    undoStack.Push(CreateAppStateSnapshot());
-
-                    undoStack.Push(prevState);
-                }
-
+                ICommand add = new AddFigureCommand(_figures, currentFigure);
+                _commandController.AddCommand(add);
                 Invalidate();
+
             }
             else if (fillReady && e.Button == MouseButtons.Left)
             {
@@ -135,12 +113,9 @@ namespace FigureDrawingApp
                 {
                     if (figure.Contains(e.Location))
                     {
-                        figure.FillColor = fillColor;
+                        ICommand fillColorCommand = new FillColorChangeCommand(fillColor, figure);
+                        _commandController.AddCommand(fillColorCommand);
                         figure.IsFilled = true;
-
-                        undoStack.Push(CreateAppStateSnapshot());
-                        redoStack.Clear();
-
                         Invalidate();
                         break;
                     }
@@ -148,40 +123,39 @@ namespace FigureDrawingApp
             }
             else if (e.Button == MouseButtons.Right)
             {
-                 foreach (var figure in _figures)
-                 {
+                foreach (var figure in _figures)
+                {
                     if (figure.Contains(e.Location))
                     {
                         using (ColorDialog colorDialog = new ColorDialog())
                         {
                             if (colorDialog.ShowDialog() == DialogResult.OK)
                             {
-                                outlineColor = colorDialog.Color;
-                                figure.OutlineColor = outlineColor;
-
-
-                                undoStack.Push(CreateAppStateSnapshot());
-                                redoStack.Clear();
-
+                                ICommand outlineColorCommand = new OutlineChangeCommand(colorDialog.Color, figure);
+                                _commandController.AddCommand(outlineColorCommand);
                                 Invalidate();
                             }
                         }
                         break;
                     }
-                 }
+                }
             }
             else if (isErasable && e.Button == MouseButtons.Left)
             {
                 foreach (var figure in _figures.ToList())
                 {
-                    if(figure.Contains(e.Location))
+                    if (figure.Contains(e.Location))
                     {
-                        RemoveFigure(figure);
+                        ICommand removeFigure = new RemoveFigureCommand(_figures, figure);
+                        _commandController.AddCommand(removeFigure);
                     }
                 }
-                undoStack.Push(CreateAppStateSnapshot());
-                redoStack.Clear();
-
+                Invalidate();
+            }
+            else if (isReadyToMove && selectedFigure != null && e.Button == MouseButtons.Left)
+            {
+                ICommand moveCommand = new MoveChangeCommand(_x, _y, selectedFigure);
+                _commandController.AddCommand(moveCommand);
                 Invalidate();
             }
 
@@ -202,7 +176,7 @@ namespace FigureDrawingApp
                         getArea = true;
                         figure.CalculateArea();
 
-                        // Convert area to square centimeters using DPI
+                        // Convert the area to square centimeters using DPI
                         double areaInSquareCentimeters = (figure.Area / (dpiX * dpiY)) * Math.Pow(2.54, 2);
 
                         MessageBox.Show($"The area of the {figure.GetType().Name} is {areaInSquareCentimeters:0.00} cm2", "Area calculation", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -211,11 +185,11 @@ namespace FigureDrawingApp
                     }
                 }
             }
-            if(e.Button == MouseButtons.Middle)
+            if (e.Button == MouseButtons.Middle)
             {
                 foreach (var figure in _figures)
                 {
-                    if(figure.Contains(e.Location))
+                    if (figure.Contains(e.Location))
                     {
                         ResizeFigure(figure);
                         break;
@@ -251,8 +225,6 @@ namespace FigureDrawingApp
         private void clearButton_Click(object sender, EventArgs e)
         {
 
-            var prevState = CreateAppStateSnapshot();
-
             fillReady = false;
             isDrawingAllowed = true;
             isReadyToMove = false;
@@ -260,10 +232,6 @@ namespace FigureDrawingApp
             fillColor = Color.Transparent;
             outlineColor = Color.Black;
             _figures.Clear();
-
-            undoStack.Push(prevState);
-            redoStack.Clear();
-
             Invalidate();
         }
 
@@ -285,22 +253,14 @@ namespace FigureDrawingApp
         {
             isErasable = false;
 
-            var prevState = CreateAppStateSnapshot();
-
             using (ColorDialog colorDialog = new ColorDialog())
             {
                 if (colorDialog.ShowDialog() == DialogResult.OK)
                 {
-
-                    //outlineColor = colorDialog.Color;
                     fillColor = colorDialog.Color;
-                    //bucketTool.Text = "Bucket tool enabled - Color: " + fillColor.ToString();
                     fillReady = true;
                 }
             }
-
-            undoStack.Push(prevState);
-            redoStack.Clear();
         }
 
         private void buttonMove_Click(object sender, EventArgs e)
@@ -321,48 +281,17 @@ namespace FigureDrawingApp
             currentFigureType = (FigureType)comboBox1.SelectedItem;
         }
 
-        private List<Figure> CreateAppStateSnapshot()
-        {
-            List<Figure> snapshot = new List<Figure>();
-
-            foreach (var figure in _figures)
-            {
-                snapshot.Add(figure.Clone());
-            }
-            redoStack.Clear();
-            return snapshot;
-        }
-
-        private void RestoreAppStateSnapshot(List<Figure> snapshot)
-        {
-            _figures.Clear();
-            foreach (var figure in snapshot)
-            {
-                _figures.Add(figure.Clone());
-            }
-            Invalidate();
-        }
 
         private void Undo()
         {
-            if (undoStack.Count > 0)
-            {
-                var currentState = CreateAppStateSnapshot();
-                redoStack.Push(currentState);
-                var previousState = undoStack.Pop();
-                RestoreAppStateSnapshot(previousState);
-            }
+            _commandController.Undo();
+            Invalidate();
         }
 
         private void Redo()
         {
-            if (redoStack.Count > 0)
-            {
-                var currentState = new List<Figure>(_figures);
-                undoStack.Push(currentState);
-                var nextState = redoStack.Pop();
-                RestoreAppStateSnapshot(nextState);
-            }
+            _commandController.Do();
+            Invalidate();
         }
 
         private void undoToolStripMenuItem_Click(object sender, EventArgs e)
@@ -386,7 +315,6 @@ namespace FigureDrawingApp
         private void RemoveFigure(Figure figure)
         {
             _figures.Remove(figure);
-            
         }
 
         private void EraseButton_Click(object sender, EventArgs e)
@@ -399,16 +327,13 @@ namespace FigureDrawingApp
 
         private void ResizeFigure(Figure figure)
         {
-            // Open the ResizeForm with the current dimensions of the selected figure
             using (Resize resizeForm = new Resize(figure.Width, figure.Height))
             {
                 if (resizeForm.ShowDialog() == DialogResult.OK)
                 {
-                    // Update the dimensions of the selected figure
+                    //Resizes the figure
                     figure.Width = resizeForm.NewWidth;
                     figure.Height = resizeForm.NewHeight;
-
-                    // Redraw the figure with the new dimensions
                     Invalidate();
                 }
             }

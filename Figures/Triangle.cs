@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FigureDrawingApp
+namespace FigureDrawingApp.Figures
 {
     public class Triangle : Figure
     {
@@ -21,7 +21,7 @@ namespace FigureDrawingApp
 
         public override void CalculateArea()
         {
-            Area = (Width * Height) / 2.0;
+            Area = Width * Height / 2.0;
         }
 
         public override Figure Clone()
@@ -31,11 +31,11 @@ namespace FigureDrawingApp
 
         public override bool Contains(PointF point)
         {
-            double A = AreaOfTriangle(new PointF(X, Y + Height), new PointF(X + (Width / 2), Y), new PointF(X + Width, Y + Height));
-            double A1 = AreaOfTriangle(point, new PointF(X, Y + Height), new PointF(X + (Width / 2), Y));
-            double A2 = AreaOfTriangle(point, new PointF(X + (Width / 2), Y), new PointF(X + Width, Y + Height));
+            double A = AreaOfTriangle(new PointF(X, Y + Height), new PointF(X + Width / 2, Y), new PointF(X + Width, Y + Height));
+            double A1 = AreaOfTriangle(point, new PointF(X, Y + Height), new PointF(X + Width / 2, Y));
+            double A2 = AreaOfTriangle(point, new PointF(X + Width / 2, Y), new PointF(X + Width, Y + Height));
             double A3 = AreaOfTriangle(point, new PointF(X, Y + Height), new PointF(X + Width, Y + Height));
-            return (A == A1 + A2 + A3);
+            return A == A1 + A2 + A3;
         }
 
         private double AreaOfTriangle(PointF p1, PointF p2, PointF p3)
@@ -47,17 +47,17 @@ namespace FigureDrawingApp
         {
             Point[] points = {
                 new Point(X, Y + Height),
-                new Point(X + (Width / 2), Y),
+                new Point(X + Width / 2, Y),
                 new Point(X + Width, Y + Height)
             };
-            g.DrawPolygon(new Pen(OutlineColor,10), points);
+            g.DrawPolygon(new Pen(OutlineColor, 10), points);
         }
 
         public override void Fill(Graphics g, SolidBrush brush)
         {
             Point[] points = {
                 new Point(X, Y + Height),
-                new Point(X + (Width / 2), Y),
+                new Point(X + Width / 2, Y),
                 new Point(X + Width, Y + Height)
             };
             g.FillPolygon(brush, points);

@@ -5,11 +5,6 @@ VisualStudioVersion = 17.8.34316.72
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FigureDrawingApp", "FigureDrawingApp.csproj", "{4181083A-8D0A-473F-AF50-C486BF89D11A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2A04F39E-8BF0-446E-9CA7-E0855861271C}"
-	ProjectSection(SolutionItems) = preProject
-		IMemento.cs = IMemento.cs
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

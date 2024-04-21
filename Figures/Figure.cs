@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FigureDrawingApp
+namespace FigureDrawingApp.Figures
 {
     //made figure public abstract instead of abstract in order to be accessible in the AppState clone
     public abstract class Figure
@@ -27,8 +27,8 @@ namespace FigureDrawingApp
 
         public virtual void SetPosition(int x, int y)
         {
-            X = x - (Width / 2);
-            Y = y  - (Height / 2);
+            X = x - Width / 2;
+            Y = y - Height / 2;
         }
 
         public abstract bool Contains(PointF point);
