@@ -31,13 +31,10 @@ namespace FigureDrawingApp
                 return;
             }
 
-            // Update the new dimensions
             NewWidth = newWidth;
             NewHeight = newHeight;
 
-            // Close the form
             DialogResult = DialogResult.OK;
-            //Close();
         }
 
         private void button2_Click(object sender, EventArgs e)

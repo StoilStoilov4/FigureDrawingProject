@@ -7,10 +7,13 @@ using System.Threading.Tasks;
 
 namespace FigureDrawingApp.Figures
 {
-    internal class Rectangle : Figure
+    [Serializable]
+    public class Rectangle : Figure
     {
 
         private readonly PointF[] _points;
+
+        public Rectangle() { }
 
         public Rectangle(int startX, int startY, int width, int height, Color fillColor, Color outlineColor)
         {

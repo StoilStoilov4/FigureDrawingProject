@@ -7,8 +7,11 @@ using System.Threading.Tasks;
 namespace FigureDrawingApp.Figures
 {
     //made figure public abstract instead of abstract in order to be accessible in the AppState clone
+    [Serializable]
     public abstract class Figure
     {
+        public Figure() { }
+
         public int X { get; set; }
         public int Y { get; set; }
         public int Width { get; set; }

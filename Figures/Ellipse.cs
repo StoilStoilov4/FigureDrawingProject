@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace FigureDrawingApp.Figures
 {
-    internal class Ellipse : Figure
+    [Serializable]
+    public class Ellipse : Figure
     {
+        public Ellipse() { }
+
         public Ellipse(int x, int y, int width, int height, Color fillColor, Color outlineColor)
         {
             X = x;
@@ -17,10 +20,7 @@ namespace FigureDrawingApp.Figures
             FillColor = fillColor;
             OutlineColor = outlineColor;
         }
-        public Ellipse()
-        {
-
-        }
+        
         public override void CalculateArea()
         {
             //PI * r^2 = Area

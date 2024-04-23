@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace FigureDrawingApp.Figures
 {
+    [Serializable]
     public class Triangle : Figure
     {
+        public Triangle() { }
 
         public Triangle(int x, int y, int width, int height, Color fillColor, Color outlineColor)
         {
