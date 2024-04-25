@@ -39,10 +39,10 @@
             editToolStripMenuItem = new ToolStripMenuItem();
             undoToolStripMenuItem = new ToolStripMenuItem();
             redoToolStripMenuItem = new ToolStripMenuItem();
-            helpToolStripMenuItem = new ToolStripMenuItem();
-            EraseButton = new Button();
             saveAsToolStripMenuItem = new ToolStripMenuItem();
             openToolStripMenuItem = new ToolStripMenuItem();
+            helpToolStripMenuItem = new ToolStripMenuItem();
+            EraseButton = new Button();
             menuStrip1.SuspendLayout();
             SuspendLayout();
             // 
@@ -141,6 +141,20 @@
             redoToolStripMenuItem.Text = "Redo (CTRL + Y)";
             redoToolStripMenuItem.Click += redoToolStripMenuItem_Click;
             // 
+            // saveAsToolStripMenuItem
+            // 
+            saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
+            saveAsToolStripMenuItem.Size = new Size(180, 22);
+            saveAsToolStripMenuItem.Text = "Save As (CTRL + S)";
+            saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
+            // 
+            // openToolStripMenuItem
+            // 
+            openToolStripMenuItem.Name = "openToolStripMenuItem";
+            openToolStripMenuItem.Size = new Size(180, 22);
+            openToolStripMenuItem.Text = "Open (CTRL + O)";
+            openToolStripMenuItem.Click += openToolStripMenuItem_Click;
+            // 
             // helpToolStripMenuItem
             // 
             helpToolStripMenuItem.Name = "helpToolStripMenuItem";
@@ -158,20 +172,6 @@
             EraseButton.Text = "Erase";
             EraseButton.UseVisualStyleBackColor = true;
             EraseButton.Click += EraseButton_Click;
-            // 
-            // saveAsToolStripMenuItem
-            // 
-            saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
-            saveAsToolStripMenuItem.Size = new Size(180, 22);
-            saveAsToolStripMenuItem.Text = "Save As";
-            saveAsToolStripMenuItem.Click += saveAsToolStripMenuItem_Click;
-            // 
-            // openToolStripMenuItem
-            // 
-            openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(180, 22);
-            openToolStripMenuItem.Text = "Open";
-            openToolStripMenuItem.Click += openToolStripMenuItem_Click;
             // 
             // FormMain
             // 

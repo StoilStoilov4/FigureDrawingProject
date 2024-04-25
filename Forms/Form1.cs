@@ -249,6 +249,14 @@ namespace FigureDrawingApp
             {
                 Redo();
             }
+            if(e.Control && e.KeyCode == Keys.S) 
+            {
+                SaveFile();
+            }
+            if (e.Control && e.KeyCode == Keys.O)
+            {
+                OpenFile();
+            }
         }
 
         private void bucketTool_Click(object sender, EventArgs e)
@@ -340,87 +348,85 @@ namespace FigureDrawingApp
             }
         }
 
-
-        private void SaveToFile(string filePath)
+        private void WriteToFile(string filePath)
         {
-            //try
-            //{
-            //    string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(_figures);
-            //    File.WriteAllText(filePath, jsonString);
-            //    MessageBox.Show("Figures saved successfully!", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show($"Error saving figures: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //}
+            var settings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.All,
+                Formatting = Formatting.Indented
+            };
 
-            var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.None };
-            TextWriter writer = null;
             try
             {
-                var jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(_figures,settings);
-                writer = new StreamWriter(filePath);
-                writer.Write(jsonString);
+                string jsonString = Newtonsoft.Json.JsonConvert.SerializeObject(_figures, settings);
+                using (TextWriter writer = new StreamWriter(filePath))
+                {
+                    writer.Write(jsonString);
+                }
             }
-            finally
+            catch (Exception ex)
             {
-                if(writer != null)
-                    writer.Close();
+                Console.WriteLine($"Error saving figures: {ex.Message}");
+                // Handle the exception as needed
             }
-
         }
 
-        private static List<Figure> LoadFromFile<T>(string filePath)
+        private static List<Figure>? LoadFromFile<T>(string filePath)
         {
-            //try
-            //{
-            //    string jsonString = File.ReadAllText(filePath);
-            //    _figures.Clear();
+            var settings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.All,
+                Formatting = Formatting.Indented
+            };
 
-            //    _figures.AddRange(Newtonsoft.Json.JsonConvert.DeserializeObject<List<Figure>>(jsonString));
-            //    MessageBox.Show("Figures loaded successfully!", "Load", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            //    Invalidate();
-            //}
-            //catch (Exception ex)
-            //{
-            //    MessageBox.Show($"Error loading figures: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            //}
-            var settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.None };
-            TextReader reader = null;
             try
             {
-                reader = new StreamReader(filePath);
-                var fileContents = reader.ReadToEnd();
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<List<Figure>>(fileContents,settings);
+                using (TextReader reader = new StreamReader(filePath))
+                {
+                    string fileContents = reader.ReadToEnd();
+                    return Newtonsoft.Json.JsonConvert.DeserializeObject<List<Figure>>(fileContents, settings);
+                }
             }
-            finally
+            catch (Exception ex)
             {
-                if (reader != null)
-                    reader.Close();
+                Console.WriteLine($"Error loading figures: {ex.Message}");
+                return null;
             }
-
         }
 
-        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SaveFile()
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "JSON Files (*.json)|*.json";
             saveFileDialog.Title = "Save Figures";
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                SaveToFile(saveFileDialog.FileName);
+                WriteToFile(saveFileDialog.FileName);
             }
         }
 
-        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        private void OpenFile()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "JSON Files (*.json)|*.json";
             openFileDialog.Title = "Load Figures";
+
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                LoadFromFile<List<Figure>>(openFileDialog.FileName);
+                _figures.Clear();
+                _figures.AddRange(LoadFromFile<List<Figure>>(openFileDialog.FileName));
+                Invalidate();
             }
+        }
+
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFile();
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFile();
         }
     }
 }
