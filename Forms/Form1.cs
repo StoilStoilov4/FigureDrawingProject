@@ -341,8 +341,8 @@ namespace FigureDrawingApp
             {
                 if (resizeForm.ShowDialog() == DialogResult.OK)
                 {
-                    figure.Width = resizeForm.NewWidth;
-                    figure.Height = resizeForm.NewHeight;
+                    ICommand command = new ResizeFigureCommand(figure, resizeForm.NewWidth, resizeForm.NewHeight);
+                    _commandController.AddCommand(command);
                     Invalidate();
                 }
             }
@@ -367,7 +367,6 @@ namespace FigureDrawingApp
             catch (Exception ex)
             {
                 Console.WriteLine($"Error saving figures: {ex.Message}");
-                // Handle the exception as needed
             }
         }
 
